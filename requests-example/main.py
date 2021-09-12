@@ -1,5 +1,4 @@
 import requests
-import pprint
 import json
 import base64
 
@@ -27,7 +26,7 @@ def get_data(url, key):
     response = requests.get(url, headers=headers)
     if (response.status_code==200):
         try:
-            data = json.loads(response.text)
+            data = response.json()
             print(type(data[key]), data[key])
             return True, data[key]
         except Exception as e:
@@ -76,7 +75,7 @@ def get_memberships(id):
     _, data = get_data(url, 'memberships')
     [show_data(issue) for issue in data if data]
 
-def get_issues(priject_name, params):
+def get_issues(params):
     logger.info("--issues example--")
     offset = 0
     limit = 100
@@ -84,7 +83,7 @@ def get_issues(priject_name, params):
     headers = get_request_headers()
     issues = []
 
-    url = f'{REDMINE_URL}/projects/{priject_name}/issues.json?'
+    url = f'{REDMINE_URL}/issues.json?'
     params_arr = [f"{key}={value}" for key, value in params.items()]
     url = url + '&'.join(params_arr)
 
@@ -114,8 +113,8 @@ def get_issue(id, params={}):
 def create_user(payload):
     url=f'{REDMINE_URL}/users.json'
     headers = get_request_headers(basicAuth=True)
-    response=requests.post(url, headers=headers, data=json.dumps(payload))
-    jsonresp = json.loads(response.text)
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    jsonresp = response.json()
     logger.info(jsonresp)
     return jsonresp
 
@@ -123,7 +122,7 @@ def create_issue(payload):
     url=f'{REDMINE_URL}/issues.json'
     headers = get_request_headers(basicAuth=True)
     response=requests.post(url, headers=headers, data=json.dumps(payload))
-    jsonresp = json.loads(response.text)
+    jsonresp = response.json()
     issue = jsonresp['issue']
     id = issue['id']
     logger.info(f'Issue(id={id}) was created.')
@@ -131,15 +130,15 @@ def create_issue(payload):
 
 def update_issue(id, payload):
     # for i in range(10):    
-        url=f'{REDMINE_URL}/issues/{id}.json'
-        headers = get_request_headers(basicAuth=True)
-        # logger.info(headers)
-        response=requests.put(url, headers=headers, data=json.dumps(payload))
-        if (response.status_code==200):
-            logger.info(f'Issue(id={id}) was updated.')
-            return True
-        else:
-            return False
+    url=f'{REDMINE_URL}/issues/{id}.json'
+    headers = get_request_headers(basicAuth=True)
+    # logger.info(headers)
+    response=requests.put(url, headers=headers, data=json.dumps(payload))
+    if (response.status_code==200):
+        logger.info(f'Issue(id={id}) was updated.')
+        return True
+    else:
+        return False
 
 def delete_issue(id):
     url=f'{REDMINE_URL}/issues/{id}.json'
@@ -160,7 +159,7 @@ def main():
     get_projects()
     logger.info("--- get issues ---")
     params = {"project_id": 1,"status_id":"*", "sort":"id:asc"}
-    get_issues('project-a', params=params)
+    get_issues(params=params)
 
     logger.info("--- get users ---")
     get_users()
