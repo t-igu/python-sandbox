@@ -1,0 +1,174 @@
+{% extends "base.html" %} {# 親テンプレートを指定 #}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jsuites.css') }}" />
+    <script src="{{ url_for('static', path='js/jsuites.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jsuites.webcomponents.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jexcel.css') }}" />
+    <script src="{{ url_for('static', path='js/jexcel.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<H1>How to use JSuite and Jspreadsheet-ce</H1>
+
+<label><p>Validation：</p>
+    <input type='text' name='name' data-required="true" data-error="The name is a required field">
+</label>
+
+
+<label><p>Mask：</p></label>
+<table>
+    <tr><td><input data-mask='U$ #.##0,00'></td>         <td>U$ #.##0,00         </td>
+    <td><input data-mask='[-]U$ #.##0,00'></td>      <td>[-]U$ #.##0,00      </td></tr>
+    <tr><td><input data-mask='dd/mm/yyyy'></td>          <td>dd/mm/yyyy          </td>
+    <td><input data-mask='yyyy-mm-dd hh24:mi'></td>  <td>yyyy-mm-dd hh24:mi  </td></tr>
+    <tr><td><input data-mask='000.000.000-00'></td>      <td>000.000.000-00      </td>
+    <td><input data-mask='aaaaa-aaaaa-aaaaa-00'></td><td>aaaaa-aaaaa-aaaaa-00</td></tr>
+</table>
+
+<label><p>Dropdown：</p>
+    <div id="dropdown"></div>
+</label>
+
+<label><p>Calendar：</p></label>
+<jsuites-calendar value="2020-01-20"></jsuites-calendar><br/>
+<input id='calendar2'>
+
+<p>Modal：</p>
+<input type='button' value='Open the modal'
+    onclick="document.querySelector('jsuites-modal').modal.open()" class='plain'>
+
+<jsuites-modal title="Webcomponent Modal" closed="true" width="600" height="480">
+    This is an example how to create a modal based on the custom HTML javascript modal.
+</jsuites-modal>    
+
+<p>spreadsheet：</p>
+<div id="spreadsheet" aria-label="spreadsheet"></div>
+
+<script>
+
+    // jSuites show loading
+    jSuites.loading.show();
+
+    // jSuites hide loading
+    function loaded(){
+        jSuites.loading.hide()
+    }
+
+    // jSuites calender event example
+    jSuites.calendar(document.getElementById('calendar2'), {
+        time:true,
+        format:'YYYY-MM-DD HH24:MI',
+        today:true,
+        months:['1','2','3','4','5','6','7','8','9','10','11','12'],
+        weekdays: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'],
+        weekdays_short: ['日','月','火','水','木','金','土'],
+    });
+    document.querySelector('jsuites-calendar').addEventListener('onchange', function(e) {
+        console.log('New value: ' + e.target.value);
+    });
+    document.querySelector('jsuites-calendar').addEventListener('onclose', function(e) {
+        console.log('Calendar is closed');
+    });
+
+    // jSuites dropdown 
+    jSuites.dropdown(document.getElementById('dropdown'), {
+        // source: addresslist,
+        url: '/json/address',
+        autocomplete: true,
+        lazyLoading: true,
+        multiple: false,
+        width: '280px',
+    });
+
+    // jexcel datasource
+    var spreadsheetdata = [
+      {"direction": "往路",
+      "targetdate": "2019-12-08",
+      "prefcode": "1", 
+      "destination": "60000000", 
+      "distance": 13.1, 
+      "transportation": "公共交通", 
+      "stayarea": "大阪", 
+      "fare": 16000, 
+      "dailyallowance": 3000, 
+      "stayallowance": 20000, 
+      "adjustmentamount": 1000,
+      "total":"=H1+I1+J1+K1", 
+      "remarks": "直行"}, 
+      {"direction": "復路",
+      "targetdate": "2019-12-09",  
+      "prefcode": "47", 
+      "destination": "907189200", 
+      "distance": 13.1, 
+      "transportation": "公共交通", 
+      "fare": 16000, 
+      "dailyallowance": 3000, 
+      "stayallowance": 0, 
+      "adjustmentamount": 0,
+      "total":"=H2+I2+J2+K2", 
+      "remarks": ""}
+    ]
+
+    // jexcel dropdown source
+    var stayarealist = ['東京','大阪','その他'];
+    var transportations = ['公共交通', '自家用車','社用車'];
+    var directions = [ '往路' ,'復路' ,];  
+
+    // jexcel dropdown filter
+    dropdownFilter = function(instance, cell, c, r, url) {
+        var value = instance.jexcel.getValueFromCoords(c - 1, r);
+        return url.filter(item => item.prefcode === value)
+    }
+
+    // jexcel create
+    var trexplist = jexcel(document.getElementById('spreadsheet'), {
+        data: spreadsheetdata,
+        minSpareRows: 1,
+        columns: [
+            { type: 'dropdown', title:'方向', width:74, source:directions },
+            { type: 'calendar', title:'日付', width:120, options: { format:'YYYY-MM-DD' } },
+            { type: 'autocomplete', title:'都道府県', width:120, url: '/json/pref', multiple: false},
+            { type: 'autocomplete', title:'訪問先', width:200, align: 'left' , url: '/json/address', lazyLoading: true, multiple: false, filter: dropdownFilter },
+            { type: 'text', title:'距離', width:100, align: 'right' ,mask:'#,##.0' },
+            { type: 'dropdown', title:'移動手段', width:120, align: 'left', source: transportations },
+            { type: 'dropdown', title:'宿泊地', width:120, align: 'left', source: stayarealist },
+            { type: 'text', title:'運賃', width:80 , align: 'right' ,mask:'#,##0', decimal:','},
+            { type: 'text', title:'日当', width:80 , align: 'right' ,mask:'#,##0', decimal:','},
+            { type: 'text', title:'宿泊費', width:80 , align: 'right' ,mask:'#,##0', decimal:','},
+            { type: 'text', title:'その他', width:80 , align: 'right' ,mask:'#,##0', decimal:','},
+            { type: 'text', title:'合計', width:100 , align: 'right' ,mask:'#,##0', decimal:','},
+            { type: 'text', title:'備考', width:200, align: 'left' },
+        ],
+        onchange:function(instance, cell, c, r, value) {
+            if (c == 0) {
+                var columnName = jspreadsheet.getColumnNameFromId([c + 1, r]);
+                instance.jexcel.setValue(columnName, '');
+            }
+        },
+        // onbeforechange: beforeChange,
+        // oninsertrow: insertedRow,
+        // oninsertcolumn: insertedColumn,
+        // ondeleterow: deletedRow,
+        // ondeletecolumn: deletedColumn,
+        // onselection: selectionActive,
+        // onsort: sort,
+        // onresizerow: resizeRow,
+        // onresizecolumn: resizeColumn,
+        // onmoverow: moveRow,
+        // onmovecolumn: moveColumn,
+        onload: setTimeout(loaded, 3000),
+        // onblur: blur,
+        // onfocus: focus,
+        // onpaste: paste,        
+    });
+
+
+</script>
+{% endblock %}
