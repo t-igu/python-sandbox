@@ -1,0 +1,11 @@
+{% if val is not none %}
+    {% if val==0 %}
+        <p>変数valは0です。</p>	
+    {% elif val==1 %}
+        <p>変数valは1です。</p>
+    {% else %}
+        <p>変数valは0と1以外です。</p>
+    {% endif %}
+{% else %}
+    <p>valが指定されてません。</p>	
+{% endif %}

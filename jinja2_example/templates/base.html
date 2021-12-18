@@ -1,0 +1,27 @@
+{# base.html baseテンプレート #} 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    {% block head %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="description" content="my page">
+    <meta name="author" content="my name">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="">    
+    <link rel="stylesheet" href="static/css/style.css" />
+    <script src="static/js/myapp.js"></script>
+    <title>{% block title %}no title{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+    <div id="footer">
+        {% block footer %}
+        &copy; Copyright 2021 by <a href="http://mysite/">my company</a>.
+        {% endblock %}
+    </div>    
+</body>
+</html>

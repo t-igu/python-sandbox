@@ -1,0 +1,12 @@
+<table>
+    <tr>
+        <td>Key</td>
+        <td>Value</td>
+    </tr>
+    {%- for person in data %}
+        {%- for key in person %}
+        <td>{{ key | e }}</td><td>{{ person[key] | e }}</td>
+        {%- endfor %}
+    {%- endfor %}
+    </table>
+</body>
