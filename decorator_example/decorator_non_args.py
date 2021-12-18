@@ -1,6 +1,5 @@
 from functools import wraps
 
-
 class DecoratorClass(object):
     def deco(self):
         def _deco(function):
