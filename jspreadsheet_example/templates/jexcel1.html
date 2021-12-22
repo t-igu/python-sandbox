@@ -1,0 +1,33 @@
+{% extends "base.html" %} {# 親テンプレートを指定 #}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jsuites.css') }}" />
+    <script src="{{ url_for('static', path='js/jsuites.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jsuites.webcomponents.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jexcel.css') }}" />
+    <script src="{{ url_for('static', path='js/jexcel.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<H1>How to use JSuite and Jspreadsheet-ce JExcel Example1</H1>
+
+<p>spreadsheet：</p>
+<div id="spreadsheet" aria-label="spreadsheet"></div>
+
+<script>
+    // jexcel create
+    jexcel(document.getElementById('spreadsheet'), {
+        url: '/json/pref',
+        columns: [
+            { type:'text', title: 'code', width:80 },
+            { type:'text', title: 'name', width:200 },
+        ]
+    });
+</script>
+{% endblock %}

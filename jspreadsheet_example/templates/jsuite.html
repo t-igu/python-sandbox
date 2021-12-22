@@ -1,0 +1,78 @@
+{% extends "base.html" %} {# 親テンプレートを指定 #}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jsuites.css') }}" />
+    <script src="{{ url_for('static', path='js/jsuites.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jsuites.webcomponents.js') }}"></script>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', path='css/jexcel.css') }}" />
+    <script src="{{ url_for('static', path='js/jexcel.js') }}"></script> -->
+{% endblock %}
+
+{% block content %}
+
+<H1>How to use JSuite and Jspreadsheet-ce</H1>
+
+<label><p>Validation：</p>
+    <input type='text' name='name' data-required="true" data-error="The name is a required field">
+</label>
+
+<label><p>Mask：</p></label>
+<table>
+    <tr><td><input data-mask='U$ #.##0,00'></td>         <td>U$ #.##0,00         </td>
+    <td><input data-mask='[-]U$ #.##0,00'></td>      <td>[-]U$ #.##0,00      </td></tr>
+    <tr><td><input data-mask='dd/mm/yyyy'></td>          <td>dd/mm/yyyy          </td>
+    <td><input data-mask='yyyy-mm-dd hh24:mi'></td>  <td>yyyy-mm-dd hh24:mi  </td></tr>
+    <tr><td><input data-mask='000.000.000-00'></td>      <td>000.000.000-00      </td>
+    <td><input data-mask='aaaaa-aaaaa-aaaaa-00'></td><td>aaaaa-aaaaa-aaaaa-00</td></tr>
+</table>
+
+<label><p>Dropdown：</p>
+    <div id="dropdown"></div>
+</label>
+
+<label><p>Calendar：</p></label>
+<jsuites-calendar value="2020-01-20"></jsuites-calendar><br/>
+<input id='calendar2'>
+
+<p>Modal：</p>
+<input type='button' value='Open the modal'
+    onclick="document.querySelector('jsuites-modal').modal.open()" class='plain'>
+
+<jsuites-modal title="Webcomponent Modal" closed="true" width="600" height="480">
+    This is an example how to create a modal based on the custom HTML javascript modal.
+</jsuites-modal>    
+
+<script>
+
+    // jSuites calender event example
+    jSuites.calendar(document.getElementById('calendar2'), {
+        time:true,
+        format:'YYYY-MM-DD HH24:MI',
+        today:true,
+        months:['1','2','3','4','5','6','7','8','9','10','11','12'],
+        weekdays: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'],
+        weekdays_short: ['日','月','火','水','木','金','土'],
+    });
+    document.querySelector('jsuites-calendar').addEventListener('onchange', function(e) {
+        console.log('New value: ' + e.target.value);
+    });
+    document.querySelector('jsuites-calendar').addEventListener('onclose', function(e) {
+        console.log('Calendar is closed');
+    });
+
+    // jSuites dropdown 
+    jSuites.dropdown(document.getElementById('dropdown'), {
+        // source: addresslist,
+        url: '/json/address',
+        autocomplete: true,
+        lazyLoading: true,
+        multiple: false,
+        width: '280px',
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %} {# 親テンプレートを指定 #}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jsuites.css') }}" />
+    <script src="{{ url_for('static', path='js/jsuites.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jsuites.webcomponents.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jexcel.css') }}" />
+    <script src="{{ url_for('static', path='js/jexcel.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<H1>How to use JSuite and Jspreadsheet-ce JExcel Example2</H1>
+
+<p>spreadsheet1：</p>
+<div id="spreadsheet2" aria-label="spreadsheet"></div>
+
+<div>
+    <button type="button" onclick="getData(); return false;">データ表示</button>
+</div>
+
+<script>
+
+    function getData(){
+        var data = farelist.getJson();        
+        alert(JSON.stringify(data));
+    }
+
+    // jSuites show loading
+    jSuites.loading.show();
+
+    // jSuites hide loading
+    function loaded(){
+        jSuites.loading.hide()
+    }
+
+    // jexcel datasource
+    var spreadsheetdata = [
+        {
+            //   "dest_prefcode": "1", 
+            "dest_addrcode": "60000000", 
+            "stay_addrcode": "60000000", 
+            "fare": 16000, 
+            "dailyallowance": 3000, 
+            "stayallowance": 20000, 
+            "adjustmentamount": 1000,
+            "total":"=C1+D1+E1+F1", 
+            "remarks": "直行",
+            // "a": "<a href='#'>edit</a>",
+        }, 
+    ]
+
+    // jexcel create
+    var farelist = jexcel(document.getElementById('spreadsheet2'), {
+        data: spreadsheetdata,
+        minSpareRows: 1,
+        columns: [
+            { type: 'dropdown', title:'住所', width:360, align: 'left' , url: '/json/address', lazyLoading: true, multiple: false},
+            { type: 'dropdown', title:'住所', width:360, align: 'left' , url: '/json/address', lazyLoading: true, multiple: false},
+            { type: 'text', title:'運賃', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'日当', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'宿泊費', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'その他', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'合計', width:120 , align: 'right' ,mask:'#,##0', readOnly:true},
+            { type: 'text', title:'備考', width:200, align: 'left' },
+        ],
+        nestedHeaders:[
+            [
+                { title: '訪問先', colspan: '1'},
+                { title: '宿泊先', colspan: '1'},
+                { title: '旅費額', colspan: '5'},
+                { title: '', colspan: '1'}
+            ],
+        ],
+        // onchange: onChange,
+        // onbeforechange: beforeChange,
+        // oninsertrow: insertedRow,
+        // oninsertcolumn: insertedColumn,
+        // ondeleterow: deletedRow,
+        // ondeletecolumn: deletedColumn,
+        // onselection: selectionActive,
+        // onsort: sort,
+        // onresizerow: resizeRow,
+        // onresizecolumn: resizeColumn,
+        // onmoverow: moveRow,
+        // onmovecolumn: moveColumn,
+        onload: setTimeout(loaded, 1000),
+        // onblur: blur,
+        // onfocus: focus,
+        // onpaste: paste,        
+    });
+
+</script>
+{% endblock %}

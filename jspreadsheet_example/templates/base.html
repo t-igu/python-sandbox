@@ -10,9 +10,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="">
     <title>{% block title %}no title{% endblock %}</title>
+    <style>
+        /* #gnav{ */
+            /* background-color: gray; */
+        /* } */
+        .inner{
+            display: flex;
+        }
+        #gnav li{
+            width: 200px;
+        }   
+    </style>
     {% endblock %}
 </head>
 <body>
+    <header>
+        <nav id="gnav">
+            <ul class="inner">
+                <li><a href="/jsuite">jsuite</a></li>
+                <li><a href="/jexcel1">jexcel1</a></li>
+                <li><a href="/jexcel2">jexcel2</a></li>
+                <li><a href="/jexcel3">jexcel3</a></li>            
+            </ul>
+        </nav>
+    </header>    
     <div id="content">
         {% block content %}{% endblock %}
     </div>

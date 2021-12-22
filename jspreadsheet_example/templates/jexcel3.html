@@ -1,0 +1,184 @@
+{% extends "base.html" %} {# 親テンプレートを指定 #}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jsuites.css') }}" />
+    <script src="{{ url_for('static', path='js/jsuites.js') }}"></script>
+    <script src="{{ url_for('static', path='js/jsuites.webcomponents.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/jexcel.css') }}" />
+    <script src="{{ url_for('static', path='js/jexcel.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<H1>How to use JSuite and Jspreadsheet-ce JExcel Example2</H1>
+
+<p>spreadsheet1：</p>
+<div id="spreadsheet3" aria-label="spreadsheet"></div>
+
+<div>
+    <button type="button" onclick="getData(); return false;">データ表示</button>
+</div>
+
+<jsuites-modal id="address-modal" title="Webcomponent Modal" closed="true" width="600" height="480">
+    <label><p>住所を選択してください：</p>
+        <div id="dropdown"></div>
+        <div>
+            <button type="button" onclick="modal_select();">選択</button>
+            <button type="button" onclick="modal_cancel();">キャンセル</button>    
+            <input type='hidden' id='target_row'/>
+        </div>
+    </label>
+</jsuites-modal>
+
+<script>
+
+    function getData(){
+        var data = farelist.getJson();        
+        alert(JSON.stringify(data));
+    }
+
+    // document.querySelector('jsuites-modal').addEventListener('onopen', function() {
+    //     console.log('Modal is open');
+    // });    
+    // document.querySelector('jsuites-modal').addEventListener('onclose', function() {
+    //     console.log('Modal is closed', document.querySelector('jsuites-modal'));
+    //     var row = document.getElementById('details_row').value;
+    //     console.log(row, address_dropdown.getValue());
+    // });
+
+    function modal_select(){
+        var row = document.getElementById('target_row').value;
+        var selected_value=address_dropdown.getValue();
+        var selected_text=address_dropdown.getText();
+        var old_value=farelist.getValue("A"+row);
+        farelist.setValue('A'+row, selected_value, false);
+        farelist.setComments('A'+row, selected_text);  
+        var new_value=farelist.getValue("A"+row);
+        console.log("row=",row, "new_value=",new_value);    
+        document.querySelector('jsuites-modal').modal.close();
+    }
+
+    function modal_cancel(){
+        document.querySelector('jsuites-modal').modal.close();
+    }
+
+    // jSuites show loading
+    jSuites.loading.show();
+
+    // jSuites hide loading
+    function loaded(){
+        jSuites.loading.hide()
+    }
+
+    var button ="<input type='button' value='選択' onclick=\"document.querySelector('jsuites-modal').modal.open()\" class='plain'>";
+
+    // jexcel datasource
+    var spreadsheetdata = [
+        {
+            //   "dest_prefcode": "1", 
+            "dest_addrcode": "60000000", 
+            "fare": 16000, 
+            "dailyallowance": 3000, 
+            "stayallowance": 20000, 
+            "adjustmentamount": 1000,
+            "total":"=B1+C1+D1+E1", 
+            "remarks": "直行",
+            // "a": "<a href='#'>edit</a>",
+        }, 
+    ]
+
+    // jexcel dropdown source
+    var transportations = ['公共交通', '自家用車','社用車'];
+
+    // jexcel dropdown filter
+    var dropdownFilter = function(instance, cell, c, r, url) {
+        var value = instance.jexcel.getValueFromCoords(c, r);
+        if(value){
+            return url.filter(item => item.prefcode === value)
+        }else{
+            return []
+        }
+    }
+
+    var selectionActive = function(instance, x1, y1, x2, y2, origin) {
+        if (x1==0 && x2==0){
+            var data = farelist.getValueFromCoords(x1, y1); 
+            address_dropdown.setValue(data);
+            console.log("x1=", x1, "y1=", y1, "x2=", x2, "y2=", y2, origin);
+            document.getElementById('target_row').value = y1+1;
+            document.querySelector('jsuites-modal').modal.open(); 
+        }
+        // var cellName1 = jexcel.getColumnNameFromId([x1, y1]);
+        // console.log(cellName1)
+    }
+
+    // jexcel create
+    var farelist = jexcel(document.getElementById('spreadsheet3'), {
+        data: spreadsheetdata,
+        minSpareRows: 1,
+        columns: [
+            // { type: 'dropdown', title:'都道府県', width:80, url: '/json/pref', multiple: false},
+            { type: 'dropdown', title:'住所', width:360, align: 'left' , url: '/json/address_many', lazyLoading: true, multiple: false, filter: dropdownFilter },
+            { type: 'text', title:'運賃', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'日当', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'宿泊費', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'その他', width:80 , align: 'right' ,mask:'#,##0'},
+            { type: 'text', title:'合計', width:120 , align: 'right' ,mask:'#,##0', readOnly:true},
+            { type: 'text', title:'備考', width:200, align: 'left' },
+            // { type: 'html', title:'操作', width:60, align: 'middle', readOnly:true },
+        ],
+        nestedHeaders:[
+            [
+                { title: '', colspan: '3'},
+                { title: '訪問先', colspan: '2'},
+                { title: '宿泊地', colspan: '2'},
+                { title: '旅費額', colspan: '4'},
+                { title: '', colspan: '3'}
+            ],
+        ],
+        // onchange:function(instance, cell, c, r, value) {
+        //     // var columnName = jspreadsheet.getColumnNameFromId([c + 1, r]);
+        //     if (c == 4 || c == 5 || c == 6 || c == 7) {
+        //         val1 = instance.jexcel.getValue("C"+r);
+        //         val2 = instance.jexcel.getValue("D"+r);
+        //         val3 = instance.jexcel.getValue("E"+r);
+        //         val4 = instance.jexcel.getValue("F"+r);
+        //         total = val1+val2+val3+val4;
+        //         console.log(val1, val2, val3, val4);
+        //         instance.jexcel.setValue("G"+r,total);
+        //     }
+        // },
+        // onbeforechange: beforeChange,
+        // oninsertrow: insertedRow,
+        // oninsertcolumn: insertedColumn,
+        // ondeleterow: deletedRow,
+        // ondeletecolumn: deletedColumn,
+        onselection: selectionActive,
+        // onsort: sort,
+        // onresizerow: resizeRow,
+        // onresizecolumn: resizeColumn,
+        // onmoverow: moveRow,
+        // onmovecolumn: moveColumn,
+        onload: setTimeout(loaded, 3000),
+        // onblur: blur,
+        // onfocus: focus,
+        // onpaste: paste,        
+    });
+
+    // jSuites dropdown
+    var address_dropdown = jSuites.dropdown(document.getElementById('dropdown'), {
+        // source: addresslist,
+        url: '/json/address_many',
+        autocomplete: true,
+        lazyLoading: true,
+        multiple: false,
+        width: '100%',
+    });
+
+</script>
+{% endblock %}

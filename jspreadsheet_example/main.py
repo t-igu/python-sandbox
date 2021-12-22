@@ -14,6 +14,22 @@ templates = Jinja2Templates(directory="templates")
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "title": "jspreadsheet-ce-example"})
 
+@app.get("/jsuite", response_class=HTMLResponse)
+async def jsuite_example(request: Request):
+    return templates.TemplateResponse("jsuite.html", {"request": request, "title": "jsuite-example"})
+
+@app.get("/jexcel1", response_class=HTMLResponse)
+async def excel1_example(request: Request):
+    return templates.TemplateResponse("jexcel1.html", {"request": request, "title": "excel-example1"})
+
+@app.get("/jexcel2", response_class=HTMLResponse)
+async def excel2_example(request: Request):
+    return templates.TemplateResponse("jexcel2.html", {"request": request, "title": "excel-example2"})
+
+@app.get("/jexcel3", response_class=HTMLResponse)
+async def excel3_example(request: Request):
+    return templates.TemplateResponse("jexcel3.html", {"request": request, "title": "excel-example3"})
+
 @app.get("/json/pref")
 async def get_preflist(request: Request):
     pref = [
@@ -69,12 +85,8 @@ async def get_preflist(request: Request):
 
 @app.get("/json/address")
 async def json_addresslist(request: Request):
-    return FileResponse('static/zenkoku.json')
+    return FileResponse('static/hokkaido.json')
 
-@app.get("/json/address/{prefcode}")
-async def json_addresslist(request: Request, prefcode: str):
-    with open('static/zenkoku.json', 'r') as f:
-        jsn = json.load(f)
-        ret = [item for item in jsn if int(item["prefcode"]) == int(prefcode)]
-        print(type(ret[0]), ret[0])
-    return ORJSONResponse(ret)
+@app.get("/json/address_many")
+async def json_addresslist(request: Request):
+    return FileResponse('static/zenkoku_all.json')
